@@ -1,0 +1,53 @@
+{% extends "_layouts/default.njk" %}
+
+{% block body %}
+  <div class="content">
+    <strong>Olá, {{user.name}}</strong>
+    {% if user.provider === true %}
+      <p>Estes são seus horários de hoje:</p>
+      <ul class="providers">
+        {% for appointment in appointments %}
+              <li class="provider">
+                <div>
+                  <img src="/files/{{ appointment.usuario.avatar }}" alt="avatar">
+                  <strong>{{ appointment.usuario.name }}</strong>
+                </div>
+                <div>
+                  <strong>Horário: {{appointment.date | date("HH:mm") }}</strong>
+                </div>
+              </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Inicie um agendamento escolhendo um profissional abaixo:</p>
+      <ul class="providers">
+        {% for provider in providers %}
+          <li class="provider">
+            <div>
+              <img src="/files/{{ provider.avatar }}" alt="avatar">
+              <strong>{{ provider.name }}</strong>
+            </div>
+
+            <a href="/app/appointments/new/{{provider.id}}">+</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <a href="/app/logout" class="logout">Sair</a>
+  </div>
+
+  <script type="text/javascript">
+    flatpickr('.flatpickr', {
+      minDate: new Date(),
+      dateFormat: 'd/m/Y',
+      onLoad: function (date) {
+        fetch(`/app/dashboard/{{ provider.id }}?date=${date[0].getTime()}`).then(function (response) {
+          response.text().then(function (html) {
+            document.getElementById('hours').innerHTML = html
+          })
+        })
+      }
+    })
+  </script>
+{% endblock %}
